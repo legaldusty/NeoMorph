@@ -2,7 +2,7 @@ name: NeoMorph
 version: '${project.version}'
 main: com.neomorph.NeoMorph
 api-version: '1.21'
-description: The ultimate morph plugin — become any mob with full abilities
+description: The ultimate morph plugin. Become any mob with full abilities
 authors: [NeoMorph Team]
 website: ''
 
@@ -23,7 +23,7 @@ commands:
 permissions:
   neomorph.use:
     description: Allows using the morph system
-    default: true
+    default: op
   neomorph.boss:
     description: Allows morphing into boss mobs (Ender Dragon, Wither)
     default: op
@@ -32,7 +32,7 @@ permissions:
     default: op
   neomorph.items:
     description: Allows morphing into blocks and items
-    default: true
+    default: op
   neomorph.bypass.cooldown:
     description: Bypass morph cooldown
     default: op

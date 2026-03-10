@@ -1,27 +1,80 @@
-MIT License
+NeoMorph Plugin License
 
-Copyright (c) 2026 NeoMorph Team
+Copyright (c) 2026 Dustyyy
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is granted to download and use this software (the “Plugin”) for personal, educational, or server use, subject to the following conditions.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Allowed Use
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Users are permitted to:
 
----
+Install and run the Plugin on Minecraft servers.
 
-NOTE: This license applies to NeoMorph's own code (com.neomorph.* packages).
-The embedded iDisguise engine (de.luisagrether.* packages) is subject to the
-iDisguise license by Luisa R. Grether — see LICENSE-iDisguise.md for terms.
+Modify the Plugin for private use only.
+
+Study the source code for learning purposes.
+
+2. Restrictions
+
+The following actions are strictly prohibited without explicit written permission from the author:
+
+Commercial Use
+
+You may not:
+
+Sell the Plugin.
+
+Sell modified versions of the Plugin.
+
+Include the Plugin in paid products, bundles, or services.
+
+Charge money specifically for access to this Plugin.
+
+Running the Plugin on a monetized server (e.g. donation store) is allowed as long as the Plugin itself is not sold.
+
+Redistribution
+
+You may not:
+
+Re-upload the Plugin to other websites.
+
+Redistribute the Plugin's source code or compiled files.
+
+Mirror or host copies of the Plugin for download.
+
+Users must obtain the Plugin only from the official distribution source provided by the author.
+
+Code Copying
+
+You may not copy or reuse substantial portions of this Plugin's source code in other projects unless:
+
+The resulting project contains significant original work, and
+
+The copied portions are not the primary functionality of the new project.
+
+Direct code duplication, minor edits, or superficial renaming does not qualify as significant modification.
+
+Claiming Ownership
+
+You may not:
+
+Claim this Plugin as your own work.
+
+Remove or alter copyright notices or attribution.
+
+3. Derivative Works
+
+Modified versions of the Plugin may only be used privately and may not be distributed publicly without permission from the author.
+
+4. Liability
+
+This software is provided "as is", without warranty of any kind.
+The author is not responsible for any damage, data loss, or server issues caused by the use of this Plugin.
+
+5. Termination
+
+Failure to comply with this license automatically terminates your permission to use the Plugin.
+
+6. Contact
+
+For permissions, licensing questions, or commercial inquiries, contact the author.

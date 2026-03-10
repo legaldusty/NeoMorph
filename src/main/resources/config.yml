@@ -1,6 +1,4 @@
-# ============================================
-#          NeoMorph Configuration
-# ============================================
+# some config :)
 
 # General Settings
 morph-cooldown: 5          # Seconds between morphs
@@ -13,15 +11,15 @@ keep-inventory-access: true # Allow inventory access while morphed
 # When true (default), you can see your own morph model. The plugin uses
 # scoreboard teams to prevent collision between you and the morph entity.
 # If you experience collision/pushing on a specific server, set to false.
+# honestly just use the default, i wouldnt bother changing
 morph-self-visible: true
 
-# Scale Settings (1.20.5+ GENERIC_SCALE attribute)
-# These control how large/small you become when morphed.
+# This is teh scale settings they control how large/small you become when morphed.
 # Scale = mob_height / player_height. Iron Golem = 1.5, Chicken = 0.39, Ghast = 2.22
 min-scale: 0.0625          # Minecraft minimum (1/16 size)
 max-scale: 16.0            # Minecraft maximum (16x size)
 
-# Ability Settings
+# some fun ability settings
 creeper-explosion-breaks-blocks: true
 creeper-explosion-power: 3.0
 creeper-charge-time: 30    # Ticks to charge (30 = 1.5 seconds)
@@ -37,10 +35,10 @@ ability-cooldown: 60       # Default ticks between active ability uses
 # Boss Morph Settings
 allow-boss-morphs: true
 
-# GUI Settings
+# GUI Settings (for the chestgui that isnt fully ready yet)
 gui-title: "NeoMorph"
 
-# Messages
+# Messages (delete the text if you dont want chat clutter)
 messages:
   morph-success: "&a&lNEOMORPH &8» &7You morphed into &e%mob%&7!"
   unmorph-success: "&a&lNEOMORPH &8» &7You returned to your normal form."
