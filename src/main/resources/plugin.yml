@@ -1,0 +1,41 @@
+name: NeoMorph
+version: '${project.version}'
+main: com.neomorph.NeoMorph
+api-version: '1.21'
+description: The ultimate morph plugin — become any mob with full abilities
+authors: [NeoMorph Team]
+website: ''
+
+# iDisguise by Luisa Grether is embedded directly into NeoMorph
+# Original source: https://github.com/LuisaGretworthy/iDisguise
+# No external iDisguise plugin is required.
+
+commands:
+  morph:
+    description: Open the morph selection GUI or morph into a specific mob
+    usage: /<command> [mob_name]
+    permission: neomorph.use
+  unmorph:
+    description: Return to your normal player form
+    usage: /<command>
+    permission: neomorph.use
+
+permissions:
+  neomorph.use:
+    description: Allows using the morph system
+    default: true
+  neomorph.boss:
+    description: Allows morphing into boss mobs (Ender Dragon, Wither)
+    default: op
+  neomorph.player:
+    description: Allows morphing into other players
+    default: op
+  neomorph.items:
+    description: Allows morphing into blocks and items
+    default: true
+  neomorph.bypass.cooldown:
+    description: Bypass morph cooldown
+    default: op
+  neomorph.admin:
+    description: Full admin access to NeoMorph
+    default: op

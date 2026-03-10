@@ -1,0 +1,50 @@
+# ============================================
+#          NeoMorph Configuration
+# ============================================
+
+# General Settings
+morph-cooldown: 5          # Seconds between morphs
+unmorph-on-death: true     # Return to player form on death
+show-morph-particles: true # Particle effects when morphing
+morph-sound: true          # Sound effects when morphing
+keep-inventory-access: true # Allow inventory access while morphed
+
+# Self-Visibility
+# When true (default), you can see your own morph model. The plugin uses
+# scoreboard teams to prevent collision between you and the morph entity.
+# If you experience collision/pushing on a specific server, set to false.
+morph-self-visible: true
+
+# Scale Settings (1.20.5+ GENERIC_SCALE attribute)
+# These control how large/small you become when morphed.
+# Scale = mob_height / player_height. Iron Golem = 1.5, Chicken = 0.39, Ghast = 2.22
+min-scale: 0.0625          # Minecraft minimum (1/16 size)
+max-scale: 16.0            # Minecraft maximum (16x size)
+
+# Ability Settings
+creeper-explosion-breaks-blocks: true
+creeper-explosion-power: 3.0
+creeper-charge-time: 30    # Ticks to charge (30 = 1.5 seconds)
+enderman-teleport-range: 50
+ghast-fireball-speed: 1.5
+blaze-fireball-count: 3
+warden-sonic-boom-damage: 30.0
+warden-darkness-range: 20
+wither-skull-speed: 1.0
+dragon-breath-duration: 100 # Ticks
+ability-cooldown: 60       # Default ticks between active ability uses
+
+# Boss Morph Settings
+allow-boss-morphs: true
+
+# GUI Settings
+gui-title: "NeoMorph"
+
+# Messages
+messages:
+  morph-success: "&a&lNEOMORPH &8» &7You morphed into &e%mob%&7!"
+  unmorph-success: "&a&lNEOMORPH &8» &7You returned to your normal form."
+  morph-cooldown: "&c&lNEOMORPH &8» &7Please wait &e%time%s &7before morphing again."
+  no-permission: "&c&lNEOMORPH &8» &7You don't have permission to do that."
+  ability-cooldown: "&c&lNEOMORPH &8» &7Ability on cooldown! &e%time%s &7remaining."
+  ability-used: "&a&lNEOMORPH &8» &7Used &e%ability%&7!"
