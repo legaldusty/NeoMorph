@@ -2,7 +2,7 @@
 
 The ultimate morph plugin for PaperMC. become any mob with full abilities, scaling, and stats.
 
-## Features
+## NeoMorph has tonss of features!
 
 - **60+ morphs** across passive, neutral, hostile, and boss categories
 - **Unique abilities** for each mob — creeper explosions, enderman teleportation, warden sonic boom, and more
@@ -12,7 +12,7 @@ The ultimate morph plugin for PaperMC. become any mob with full abilities, scali
 - **Player morphs** — disguise as any online player with their skin
 - **also has a gui selector but thats a work in prog (some dont work)**
 
-## Requirements
+## Requirements (IMPORTANT!)
 
 - **PaperMC 1.21.1+** (not compatible with Spigot or Bukkit)
 - **Java 21+**
