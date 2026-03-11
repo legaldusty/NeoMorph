@@ -1,4 +1,4 @@
-# NeoMorph
+# NeoMorph by Dusty
 
 The ultimate morph plugin for PaperMC. become any mob with full abilities, scaling, and stats.
 
