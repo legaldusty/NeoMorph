@@ -84,3 +84,13 @@ NeoMorph includes an embedded disguise engine based on [**iDisguise**](https://g
 NeoMorph's own code is released under the MIT License — see [LICENSE](LICENSE).
 
 The embedded iDisguise engine (the `de.luisagrether.*` packages) is subject to the [iDisguise license](LICENSE-iDisguise.md), which requires **non-commercial use** and **proper attribution**. Please review it before distributing.
+
+
+
+
+
+# KNOWN BUGS:
+
+- Ender Dragon morph is bugged visually.
+- Chest UI for morphs (/morph command ui) is bugged as well (**due to it being incomplete.**)
+- thats all i know so far :)
