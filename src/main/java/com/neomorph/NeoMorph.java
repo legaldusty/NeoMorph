@@ -22,38 +22,30 @@ public class NeoMorph extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Save default config
         saveDefaultConfig();
 
-        // Initialize embedded iDisguise engine (by Luisa Grether — bundled with permission)
         disguiseEngine = new iDisguise(this);
         disguiseEngine.init();
         getLogger().info("iDisguise engine initialized (embedded, by Luisa Grether).");
 
-        // Initialize ability registry (all mob definitions)
         abilityRegistry = new AbilityRegistry();
         getLogger().info("Registered " + abilityRegistry.getAllAbilities().size() + " mob morphs.");
 
-        // Initialize morph manager
         morphManager = new MorphManager(this, abilityRegistry);
 
-        // Initialize GUI
         String guiTitle = getConfig().getString("gui-title", "NeoMorph");
         morphGUI = new MorphGUI(morphManager, guiTitle);
 
-        // Register commands
         MorphCommand morphCommand = new MorphCommand(morphManager, morphGUI);
         getCommand("morph").setExecutor(morphCommand);
         getCommand("morph").setTabCompleter(morphCommand);
         getCommand("unmorph").setExecutor(new UnmorphCommand(morphManager));
 
-        // Register listeners
         getServer().getPluginManager().registerEvents(new GUIListener(this, morphManager, morphGUI), this);
         getServer().getPluginManager().registerEvents(new MorphListener(this, morphManager), this);
         getServer().getPluginManager().registerEvents(new AbilityListener(this, morphManager), this);
         getServer().getPluginManager().registerEvents(new DisguisePersistListener(morphManager), this);
 
-        // Start ability tick handler (runs every tick)
         AbilityTickHandler tickHandler = new AbilityTickHandler(this, morphManager);
         tickHandler.runTaskTimer(this, 20L, 1L);
 
@@ -63,11 +55,9 @@ public class NeoMorph extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Unmorph all players on shutdown
         if (morphManager != null) {
             morphManager.unmorphAll();
         }
-        // Shutdown embedded iDisguise engine
         if (disguiseEngine != null) {
             disguiseEngine.shutdown();
         }

@@ -38,16 +38,13 @@ public class MorphCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // No args — open GUI
         if (args.length == 0) {
             gui.open(player);
             return true;
         }
 
-        // With args — try to morph directly
         String mobName = String.join("_", args).toUpperCase();
 
-        // Check if it's a player name first
         if (args.length == 1) {
             Player target = player.getServer().getPlayer(args[0]);
             if (target != null) {
@@ -56,7 +53,6 @@ public class MorphCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        // Try to parse as entity type
         try {
             EntityType entityType = EntityType.valueOf(mobName);
             if (morphManager.getRegistry().hasAbility(entityType)) {
@@ -79,13 +75,11 @@ public class MorphCommand implements CommandExecutor, TabCompleter {
             String input = args[0].toLowerCase();
             List<String> suggestions = new ArrayList<>();
 
-            // Add mob names
             suggestions.addAll(morphManager.getRegistry().getAllAbilities().stream()
                     .map(a -> a.getEntityType().name().toLowerCase())
                     .filter(name -> name.startsWith(input))
                     .collect(Collectors.toList()));
 
-            // Add online player names
             suggestions.addAll(sender.getServer().getOnlinePlayers().stream()
                     .map(p -> p.getName().toLowerCase())
                     .filter(name -> name.startsWith(input))

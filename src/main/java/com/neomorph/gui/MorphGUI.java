@@ -31,7 +31,6 @@ public class MorphGUI {
     private final MorphManager morphManager;
     private final String guiTitle;
 
-    // Track player GUI state
     private final Map<UUID, Category> playerCategory = new HashMap<>();
     private final Map<UUID, Integer> playerPage = new HashMap<>();
 
@@ -51,13 +50,11 @@ public class MorphGUI {
         Inventory gui = Bukkit.createInventory(null, GUI_SIZE,
                 Component.text(guiTitle).color(NamedTextColor.DARK_PURPLE).decoration(TextDecoration.BOLD, true));
 
-        // Fill background
         ItemStack filler = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         for (int i = 0; i < GUI_SIZE; i++) {
             gui.setItem(i, filler);
         }
 
-        // Category tabs (row 0)
         gui.setItem(1, createCategoryTab(Material.GREEN_WOOL, "Passive Mobs",
                 category == Category.PASSIVE, Category.PASSIVE));
         gui.setItem(2, createCategoryTab(Material.YELLOW_WOOL, "Neutral Mobs",
@@ -69,21 +66,18 @@ public class MorphGUI {
         gui.setItem(5, createCategoryTab(Material.PLAYER_HEAD, "Players",
                 category == Category.PLAYER, Category.PLAYER));
 
-        // Unmorph button
         if (morphManager.isMorphed(player)) {
             ItemStack unmorphItem = createItem(Material.BARRIER, "&c&lUnmorph",
                     "&7Click to return to", "&7your normal form");
             gui.setItem(8, unmorphItem);
         }
 
-        // Content area
         if (category == Category.PLAYER) {
             populatePlayerPage(gui, page);
         } else {
             populateMobPage(gui, category, page);
         }
 
-        // Navigation (row 5)
         List<?> items = category == Category.PLAYER ?
                 new ArrayList<>(Bukkit.getOnlinePlayers()) :
                 morphManager.getRegistry().getByCategory(category);
@@ -143,23 +137,19 @@ public class MorphGUI {
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;
 
-        // Name
         meta.displayName(Component.text(mob.getDisplayName())
                 .color(NamedTextColor.GOLD)
                 .decoration(TextDecoration.BOLD, true)
                 .decoration(TextDecoration.ITALIC, false));
 
-        // Lore with stats
         List<Component> lore = new ArrayList<>();
         lore.add(Component.empty());
 
-        // Health
         lore.add(Component.text("  Health: ")
                 .color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
                 .append(Component.text(formatHealth(mob.getMaxHealth()))
                         .color(NamedTextColor.RED).decoration(TextDecoration.ITALIC, false)));
 
-        // Speed
         if (mob.getSpeedMultiplier() != 1.0) {
             lore.add(Component.text("  Speed: ")
                     .color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
@@ -168,7 +158,6 @@ public class MorphGUI {
                             .decoration(TextDecoration.ITALIC, false)));
         }
 
-        // Special traits
         lore.add(Component.empty());
         if (mob.canFly()) addTraitLine(lore, "Can Fly", NamedTextColor.AQUA);
         if (mob.isFireImmune()) addTraitLine(lore, "Fire Immune", NamedTextColor.GOLD);
@@ -178,7 +167,6 @@ public class MorphGUI {
         if (mob.hasNoFallDamage()) addTraitLine(lore, "No Fall Damage", NamedTextColor.GREEN);
         if (mob.getKnockbackResistance() > 0) addTraitLine(lore, "Knockback Resistant", NamedTextColor.DARK_GREEN);
 
-        // Active ability
         if (mob.hasActiveAbility()) {
             lore.add(Component.empty());
             lore.add(Component.text("  Sneak Ability: ")
@@ -187,7 +175,6 @@ public class MorphGUI {
                             .color(NamedTextColor.LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false)));
         }
 
-        // Attack ability
         if (mob.hasAttackAbility()) {
             lore.add(Component.text("  Attack Ability: ")
                     .color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
@@ -195,7 +182,6 @@ public class MorphGUI {
                             .color(NamedTextColor.LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false)));
         }
 
-        // Click instruction
         lore.add(Component.empty());
         lore.add(Component.text("  Click to morph!")
                 .color(NamedTextColor.YELLOW)
@@ -260,7 +246,6 @@ public class MorphGUI {
         return (int) (multiplier * 100) + "%";
     }
 
-    // State accessors for the GUI listener
     public Category getPlayerCategory(UUID uuid) {
         return playerCategory.getOrDefault(uuid, Category.PASSIVE);
     }

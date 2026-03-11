@@ -31,7 +31,6 @@ public class GUIListener implements Listener {
         if (!(event.getWhoClicked() instanceof Player player)) return;
 
         String title = "NeoMorph";
-        // Check if this is our GUI by checking the inventory title
         if (event.getView().title() == null) return;
         String viewTitle = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
                 .plainText().serialize(event.getView().title());
@@ -47,7 +46,6 @@ public class GUIListener implements Listener {
         Category currentCategory = gui.getPlayerCategory(uuid);
         int currentPage = gui.getPlayerPage(uuid);
 
-        // Category tabs
         switch (slot) {
             case 1 -> { gui.open(player, Category.PASSIVE, 0); return; }
             case 2 -> { gui.open(player, Category.NEUTRAL, 0); return; }
@@ -56,7 +54,6 @@ public class GUIListener implements Listener {
             case 5 -> { gui.open(player, Category.PLAYER, 0); return; }
         }
 
-        // Unmorph button
         if (slot == 8) {
             if (morphManager.isMorphed(player)) {
                 player.closeInventory();
@@ -65,19 +62,17 @@ public class GUIListener implements Listener {
             return;
         }
 
-        // Navigation
-        if (slot == 47) { // Previous page
+        if (slot == 47) {
             if (currentPage > 0) {
                 gui.open(player, currentCategory, currentPage - 1);
             }
             return;
         }
-        if (slot == 51) { // Next page
+        if (slot == 51) {
             gui.open(player, currentCategory, currentPage + 1);
             return;
         }
 
-        // Content slot clicked — determine which mob was selected
         int[] contentSlots = gui.getContentSlots();
         int contentIndex = -1;
         for (int i = 0; i < contentSlots.length; i++) {
@@ -91,7 +86,6 @@ public class GUIListener implements Listener {
         int itemIndex = (currentPage * gui.getItemsPerPage()) + contentIndex;
 
         if (currentCategory == Category.PLAYER) {
-            // Player morph
             List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
             onlinePlayers.sort(Comparator.comparing(Player::getName));
             if (itemIndex >= 0 && itemIndex < onlinePlayers.size()) {
@@ -100,7 +94,6 @@ public class GUIListener implements Listener {
                 morphManager.morphIntoPlayer(player, target.getName());
             }
         } else {
-            // Mob morph
             List<MobAbility> mobs = morphManager.getRegistry().getByCategory(currentCategory);
             if (itemIndex >= 0 && itemIndex < mobs.size()) {
                 MobAbility mob = mobs.get(itemIndex);

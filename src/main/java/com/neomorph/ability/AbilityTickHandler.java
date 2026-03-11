@@ -36,66 +36,45 @@ public class AbilityTickHandler extends BukkitRunnable {
 
             MobAbility ability = session.getAbility();
 
-            // =================================================================
-            //  DISGUISE SELF-VISIBILITY — this is the core fix.
-            //  iDisguise works by spawning a real entity and hiding the player.
-            //  It gives 100 ticks of invisibility, then hides the entity from
-            //  the player. We counteract this by:
-            //  1. Keeping the invisibility potion refreshed (hides real body)
-            //  2. Re-showing the disguise entity to the player
-            // =================================================================
             if (tickCounter % 80 == 0 && session.getMorphType() != EntityType.PLAYER) {
-                // Refresh invisibility so the player's real body stays hidden
                 player.addPotionEffect(new PotionEffect(
                         PotionEffectType.INVISIBILITY, 200, 1, true, false, false));
 
-                // Self-visibility: show the disguise entity to the player themselves.
-                // This is OFF by default because showing the entity to the client
-                // enables client-side collision physics that no server-side fix can
-                // reliably prevent across all server configurations.
                 if (plugin.getConfig().getBoolean("morph-self-visible", true)) {
                     showDisguiseEntityToSelf(player);
                 }
             }
 
-            // Sunlight burning
             if (ability.burnsInSunlight() && tickCounter % 20 == 0) {
                 handleSunlightBurning(player);
             }
 
-            // Water damage (Enderman, Strider)
             if (ability.takesWaterDamage() && tickCounter % 10 == 0) {
                 handleWaterDamage(player);
             }
 
-            // Ambient particles
             if (tickCounter % 5 == 0) {
                 spawnAmbientParticles(player, session);
             }
 
-            // Pufferfish poison aura
             if (ability.getEntityType() == EntityType.PUFFERFISH && tickCounter % 20 == 0) {
                 handlePufferfishPoison(player);
             }
 
-            // Warden darkness aura
             if (ability.getEntityType() == EntityType.WARDEN && tickCounter % 40 == 0) {
                 handleWardenDarkness(player);
             }
 
-            // Keep flight enabled for flying mobs
             if (ability.canFly() && !player.getAllowFlight()) {
                 player.setAllowFlight(true);
             }
 
-            // Action bar reminder
             if (tickCounter % 60 == 0 && ability.hasActiveAbility()) {
                 MessageUtil.sendActionBar(player,
                         "&7Morphed as &e" + ability.getDisplayName() +
                                 " &8| &eSNEAK &7= &f" + ability.getActiveAbilityName());
             }
 
-            // Refresh infinite-duration potion effects that might have expired
             if (tickCounter % 200 == 0) {
                 for (PotionEffect effect : ability.getPassiveEffects()) {
                     if (!player.hasPotionEffect(effect.getType())) {
@@ -106,28 +85,18 @@ public class AbilityTickHandler extends BukkitRunnable {
         }
     }
 
-    /**
-     * Finds the iDisguise entity (tagged with "iDisguise" metadata pointing to
-     * the player's UUID) and calls showEntity to make it visible to the player.
-     * Uses iDisguise's plugin reference so it undoes iDisguise's hideEntity call.
-     */
     private void showDisguiseEntityToSelf(Player player) {
-        // Use the NeoMorph plugin reference directly since iDisguise is embedded
-        // iDisguise uses the same plugin reference internally
         for (Entity entity : player.getNearbyEntities(3, 3, 3)) {
             if (entity.hasMetadata("iDisguise")) {
                 for (MetadataValue meta : entity.getMetadata("iDisguise")) {
                     if (meta.value() instanceof java.util.UUID uuid &&
                             uuid.equals(player.getUniqueId())) {
-                        // This is our disguise entity — show it to us
                         try {
                             player.showEntity(plugin, entity);
                         } catch (Exception ignored) {}
-                        // Keep collision disabled via both methods for maximum compatibility
                         if (entity instanceof org.bukkit.entity.LivingEntity le) {
                             le.setCollidable(false);
                         }
-                        // Reinforce team membership on the PLAYER'S scoreboard (foolproof)
                         morphManager.addEntityToNoCollisionTeam(player, entity);
                         return;
                     }
@@ -143,20 +112,15 @@ public class AbilityTickHandler extends BukkitRunnable {
         Location loc = player.getLocation();
         long time = world.getTime();
 
-        // Only burn during day (0 to 13000)
         if (time > 13000 || time < 0) return;
 
-        // Check if exposed to sky
         int highestY = world.getHighestBlockYAt(loc);
         if (loc.getBlockY() < highestY) return;
 
-        // Check for rain
         if (world.hasStorm()) return;
 
-        // Check for helmet (helmets protect from sun)
         if (player.getEquipment() != null && player.getEquipment().getHelmet() != null) return;
 
-        // Set on fire
         player.setFireTicks(40);
     }
 

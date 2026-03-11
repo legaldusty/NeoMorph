@@ -12,7 +12,6 @@ public class MorphSession {
     private final MobAbility ability;
     private final long morphTime;
 
-    // Original player values to restore on unmorph
     private final double originalMaxHealth;
     private final double originalHealth;
     private final double originalScale;
@@ -26,7 +25,6 @@ public class MorphSession {
     private final boolean wasAllowFlight;
     private final boolean wasFlying;
 
-    // Ability cooldown tracking
     private long lastActiveAbilityUse;
     private long lastAttackAbilityUse;
     private boolean abilityCharging;

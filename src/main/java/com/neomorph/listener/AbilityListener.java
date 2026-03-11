@@ -33,9 +33,6 @@ public class AbilityListener implements Listener {
         this.morphManager = morphManager;
     }
 
-    // =========================================================================
-    //  SNEAK ABILITIES — triggered when player starts sneaking
-    // =========================================================================
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerSneak(PlayerToggleSneakEvent event) {
         Player player = event.getPlayer();
@@ -46,7 +43,6 @@ public class AbilityListener implements Listener {
         MobAbility ability = session.getAbility();
         if (!ability.hasActiveAbility()) return;
 
-        // Check cooldown
         long currentTick = player.getWorld().getGameTime();
         long elapsed = currentTick - session.getLastActiveAbilityUse();
         if (elapsed < ability.getAbilityCooldownTicks()) {
@@ -57,7 +53,6 @@ public class AbilityListener implements Listener {
             return;
         }
 
-        // Execute ability
         boolean success = executeActiveAbility(player, session, ability.getActiveAbility());
         if (success) {
             session.setLastActiveAbilityUse(currentTick);
@@ -99,9 +94,6 @@ public class AbilityListener implements Listener {
         };
     }
 
-    // =========================================================================
-    //  ATTACK ABILITIES — triggered when player attacks an entity
-    // =========================================================================
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerAttack(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player player)) return;
@@ -110,12 +102,10 @@ public class AbilityListener implements Listener {
         MorphSession session = morphManager.getSession(player);
         MobAbility ability = session.getAbility();
 
-        // Apply attack damage from mob stats
         if (ability.getAttackDamage() > 1.0) {
             event.setDamage(ability.getAttackDamage());
         }
 
-        // Attack abilities (poison, wither, etc.)
         if (!ability.hasAttackAbility()) return;
         if (!(event.getEntity() instanceof LivingEntity target)) return;
 
@@ -126,35 +116,27 @@ public class AbilityListener implements Listener {
             default -> {}
         }
 
-        // Wither skeleton wither effect
         if (session.getAbility().getEntityType() == EntityType.WITHER_SKELETON) {
             target.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 200, 0));
         }
 
-        // Husk hunger effect
         if (session.getAbility().getEntityType() == EntityType.HUSK) {
             target.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 140, 0));
         }
 
-        // Stray slowness effect
         if (session.getAbility().getEntityType() == EntityType.STRAY) {
             target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 0));
         }
 
-        // Cave spider poison
         if (session.getAbility().getEntityType() == EntityType.CAVE_SPIDER) {
             target.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 150, 0));
         }
 
-        // Bogged poison arrows
         if (session.getAbility().getEntityType() == EntityType.BOGGED) {
             target.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 0));
         }
     }
 
-    // =========================================================================
-    //  ABILITY IMPLEMENTATIONS
-    // =========================================================================
 
     private boolean creeperExplode(Player player) {
         float power = (float) plugin.getConfig().getDouble("creeper-explosion-power", 3.0);
@@ -167,11 +149,9 @@ public class AbilityListener implements Listener {
             public void run() {
                 if (!player.isOnline()) return;
                 Location loc = player.getLocation();
-                // Make player invulnerable during own explosion
                 player.setInvulnerable(true);
                 player.getWorld().createExplosion(loc, power, false, breakBlocks, player);
                 player.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, loc, 1);
-                // Remove invulnerability after 1 tick
                 new BukkitRunnable() {
                     @Override
                     public void run() {
@@ -200,9 +180,7 @@ public class AbilityListener implements Listener {
         teleportLoc.setYaw(player.getLocation().getYaw());
         teleportLoc.setPitch(player.getLocation().getPitch());
 
-        // Verify safe landing
         if (!teleportLoc.getBlock().isPassable() || !teleportLoc.clone().add(0, 1, 0).getBlock().isPassable()) {
-            // Try on top of the block
             teleportLoc = hitBlock.getLocation().add(0.5, 1, 0.5);
             if (!teleportLoc.getBlock().isPassable()) {
                 MessageUtil.send(player, "&c&lNEOMORPH &8» &7Teleport location is blocked.");
@@ -210,15 +188,12 @@ public class AbilityListener implements Listener {
             }
         }
 
-        // Play effects at origin
         Location origin = player.getLocation();
         player.getWorld().playSound(origin, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
         player.getWorld().spawnParticle(Particle.PORTAL, origin.add(0, 1, 0), 50, 0.5, 1, 0.5, 0.5);
 
-        // Teleport
         player.teleport(teleportLoc);
 
-        // Play effects at destination
         player.getWorld().playSound(teleportLoc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
         player.getWorld().spawnParticle(Particle.PORTAL, teleportLoc.add(0, 1, 0), 50, 0.5, 1, 0.5, 0.5);
 
@@ -237,7 +212,6 @@ public class AbilityListener implements Listener {
         fireball.setYield(2.0f);
         fireball.setIsIncendiary(true);
 
-        // Brief invulnerability to protect against own fireball explosion
         player.setInvulnerable(true);
         new BukkitRunnable() {
             @Override
@@ -257,7 +231,6 @@ public class AbilityListener implements Listener {
 
         player.getWorld().playSound(eyeLoc, Sound.ENTITY_BLAZE_SHOOT, 1.0f, 1.0f);
 
-        // Brief invulnerability to protect against own fireballs spawning at close range
         player.setInvulnerable(true);
         new BukkitRunnable() {
             @Override
@@ -298,7 +271,6 @@ public class AbilityListener implements Listener {
         skull.setShooter(player);
         skull.setDirection(direction);
 
-        // Brief invulnerability to protect against own wither skull explosion
         player.setInvulnerable(true);
         new BukkitRunnable() {
             @Override
@@ -312,7 +284,6 @@ public class AbilityListener implements Listener {
     }
 
     private boolean dragonBreath(Player player) {
-        // Spawn cloud 5 blocks in front of the player so it doesn't hit them
         Vector dir = player.getLocation().getDirection().setY(0).normalize();
         Location loc = player.getLocation().add(dir.multiply(5));
         int duration = plugin.getConfig().getInt("dragon-breath-duration", 100);
@@ -326,7 +297,6 @@ public class AbilityListener implements Listener {
         cloud.setParticle(Particle.DRAGON_BREATH);
         cloud.addCustomEffect(new PotionEffect(PotionEffectType.INSTANT_DAMAGE, 1, 1), true);
 
-        // Make caster immune to own breath for a moment
         player.setInvulnerable(true);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.5f);
         player.getWorld().spawnParticle(Particle.DRAGON_BREATH, loc.add(0, 0.5, 0), 100, 2, 0.5, 2, 0.01);
@@ -346,12 +316,10 @@ public class AbilityListener implements Listener {
         player.getWorld().playSound(eyeLoc, Sound.ENTITY_WARDEN_SONIC_BOOM, 2.0f, 1.0f);
         player.getWorld().playSound(eyeLoc, Sound.ENTITY_WARDEN_SONIC_CHARGE, 2.0f, 1.0f);
 
-        // Ray trace for target
         RayTraceResult result = player.getWorld().rayTraceEntities(
                 eyeLoc, direction, 15.0, 1.0,
                 entity -> entity instanceof LivingEntity && entity != player);
 
-        // Spawn sonic boom particles along the path
         for (double d = 0; d < 15; d += 0.5) {
             Location particleLoc = eyeLoc.clone().add(direction.clone().multiply(d));
             player.getWorld().spawnParticle(Particle.SONIC_BOOM, particleLoc, 1, 0, 0, 0, 0);
@@ -359,7 +327,6 @@ public class AbilityListener implements Listener {
 
         if (result != null && result.getHitEntity() instanceof LivingEntity target) {
             target.damage(damage, player);
-            // Knockback
             Vector knockback = direction.clone().normalize().multiply(2.0);
             knockback.setY(0.5);
             target.setVelocity(target.getVelocity().add(knockback));
@@ -372,13 +339,11 @@ public class AbilityListener implements Listener {
         Location eyeLoc = player.getEyeLocation();
         Vector direction = eyeLoc.getDirection();
 
-        // Find nearest entity to target
         RayTraceResult result = player.getWorld().rayTraceEntities(
                 eyeLoc, direction, 20.0, 1.5,
                 entity -> entity instanceof LivingEntity && entity != player);
 
         if (result != null && result.getHitEntity() instanceof LivingEntity target) {
-            // Spawn shulker bullet (as snowball with effects)
             ShulkerBullet bullet = player.getWorld().spawn(
                     eyeLoc.add(direction.multiply(1.5)), ShulkerBullet.class);
             bullet.setShooter(player);
@@ -397,7 +362,6 @@ public class AbilityListener implements Listener {
         Vector direction = eyeLoc.getDirection().multiply(1.2);
         direction.setY(direction.getY() + 0.3);
 
-        // Throw a splash potion with random negative effect
         PotionEffectType[] effects = {
                 PotionEffectType.POISON, PotionEffectType.SLOWNESS,
                 PotionEffectType.WEAKNESS, PotionEffectType.INSTANT_DAMAGE
@@ -418,7 +382,6 @@ public class AbilityListener implements Listener {
             potion.setItem(potionItem);
         }
 
-        // Brief invulnerability so the splash doesn't hit the caster
         player.setInvulnerable(true);
         new BukkitRunnable() {
             @Override
@@ -437,7 +400,6 @@ public class AbilityListener implements Listener {
 
         player.getWorld().playSound(loc, Sound.ENTITY_EVOKER_CAST_SPELL, 1.0f, 1.0f);
 
-        // Spawn fangs in a line
         for (int i = 1; i <= 10; i++) {
             final int distance = i;
             new BukkitRunnable() {
@@ -445,7 +407,6 @@ public class AbilityListener implements Listener {
                 public void run() {
                     if (!player.isOnline()) return;
                     Location fangLoc = player.getLocation().add(direction.clone().multiply(distance));
-                    // Find ground level
                     fangLoc.setY(player.getWorld().getHighestBlockYAt(fangLoc));
 
                     EvokerFangs fangs = player.getWorld().spawn(fangLoc, EvokerFangs.class);
@@ -464,7 +425,6 @@ public class AbilityListener implements Listener {
         player.setVelocity(velocity);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_RAVAGER_ROAR, 1.5f, 1.0f);
 
-        // Damage and knockback nearby entities after short delay
         new BukkitRunnable() {
             int ticks = 0;
             @Override
@@ -498,7 +458,6 @@ public class AbilityListener implements Listener {
                 entity -> entity instanceof LivingEntity && entity != player);
 
         if (result != null && result.getHitEntity() instanceof LivingEntity target) {
-            // Simulate laser with particles
             player.getWorld().playSound(eyeLoc, Sound.ENTITY_GUARDIAN_ATTACK, 1.0f, 1.0f);
 
             Location start = eyeLoc.clone();
@@ -527,12 +486,11 @@ public class AbilityListener implements Listener {
         }
 
         Vector direction = player.getLocation().getDirection().normalize().multiply(3.0);
-        direction.setY(Math.min(direction.getY(), -0.5)); // Force downward
+        direction.setY(Math.min(direction.getY(), -0.5));
         player.setVelocity(direction);
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PHANTOM_SWOOP, 1.5f, 1.0f);
 
-        // Damage on impact
         new BukkitRunnable() {
             int ticks = 0;
             @Override
@@ -565,7 +523,6 @@ public class AbilityListener implements Listener {
                 eyeLoc.add(direction.multiply(1.5)), WindCharge.class);
         windCharge.setShooter(player);
 
-        // Brief invulnerability to protect against own wind charge
         player.setInvulnerable(true);
         new BukkitRunnable() {
             @Override
@@ -603,7 +560,6 @@ public class AbilityListener implements Listener {
         player.setVelocity(velocity);
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GOAT_RAM_IMPACT, 1.5f, 1.0f);
 
-        // Damage entities in path
         new BukkitRunnable() {
             int ticks = 0;
             @Override
@@ -643,13 +599,10 @@ public class AbilityListener implements Listener {
         player.getWorld().playSound(loc, Sound.ENTITY_IRON_GOLEM_ATTACK, 1.5f, 0.8f);
         player.getWorld().spawnParticle(Particle.CRIT, loc, 30, 2, 0.5, 2, 0.1);
 
-        // Damage and launch nearby entities — EXCLUDE self
         for (Entity entity : player.getNearbyEntities(4, 2, 4)) {
             if (entity instanceof LivingEntity target && entity != player) {
                 target.damage(10.0, player);
                 Vector diff = target.getLocation().subtract(loc).toVector();
-                // If entity is at the exact same position, push them in a random direction
-                // to avoid NaN from normalizing a zero vector
                 if (diff.lengthSquared() < 0.01) {
                     diff = new Vector(Math.random() - 0.5, 0, Math.random() - 0.5).normalize();
                 } else {
@@ -661,7 +614,6 @@ public class AbilityListener implements Listener {
             }
         }
 
-        // Ground pound particles
         for (double angle = 0; angle < Math.PI * 2; angle += Math.PI / 8) {
             for (double r = 0.5; r <= 3; r += 0.5) {
                 Location particleLoc = loc.clone().add(Math.cos(angle) * r, 0.1, Math.sin(angle) * r);
@@ -677,7 +629,6 @@ public class AbilityListener implements Listener {
         Location loc = player.getLocation();
         player.getWorld().playSound(loc, Sound.ENTITY_SILVERFISH_AMBIENT, 2.0f, 0.5f);
 
-        // Spawn a few silverfish
         for (int i = 0; i < 5; i++) {
             Location spawnLoc = loc.clone().add(
                     random.nextDouble() * 3 - 1.5,
@@ -685,7 +636,6 @@ public class AbilityListener implements Listener {
                     random.nextDouble() * 3 - 1.5
             );
             Silverfish silverfish = player.getWorld().spawn(spawnLoc, Silverfish.class);
-            // Make them temporary — despawn after 10 seconds
             new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -698,7 +648,6 @@ public class AbilityListener implements Listener {
     }
 
     private boolean spiderClimb(Player player) {
-        // Give brief levitation to simulate wall climbing
         player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 15, 1, true, false, false));
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SPIDER_STEP, 0.5f, 1.0f);
         return true;
@@ -723,14 +672,12 @@ public class AbilityListener implements Listener {
 
         player.getWorld().playSound(loc, Sound.ENTITY_ELDER_GUARDIAN_CURSE, 2.0f, 1.0f);
 
-        // Apply mining fatigue to all nearby players
         for (Entity entity : player.getNearbyEntities(range, range, range)) {
             if (entity instanceof Player target && target != player) {
                 target.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, 300, 2));
             }
         }
 
-        // Ghost effect
         player.getWorld().spawnParticle(Particle.ELDER_GUARDIAN, loc.add(0, 1, 0), 1);
         return true;
     }
@@ -739,7 +686,6 @@ public class AbilityListener implements Listener {
         Location loc = player.getLocation();
         player.getWorld().playSound(loc, Sound.ENTITY_DOLPHIN_PLAY, 1.0f, 1.0f);
 
-        // Give dolphin's grace to nearby players
         for (Entity entity : player.getNearbyEntities(10, 5, 10)) {
             if (entity instanceof Player target) {
                 target.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 200, 0));
@@ -747,7 +693,6 @@ public class AbilityListener implements Listener {
             }
         }
 
-        // Also give to self
         player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 200, 0));
         return true;
     }
@@ -767,7 +712,6 @@ public class AbilityListener implements Listener {
         Location loc = player.getLocation();
         player.getWorld().playSound(loc, Sound.ENTITY_WOLF_HOWL, 2.0f, 1.0f);
 
-        // Buff nearby players (like a wolf pack)
         for (Entity entity : player.getNearbyEntities(15, 5, 15)) {
             if (entity instanceof Player target) {
                 target.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 200, 0));
@@ -776,7 +720,6 @@ public class AbilityListener implements Listener {
             }
         }
 
-        // Self buff
         player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 300, 1));
         player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 300, 1));
         return true;

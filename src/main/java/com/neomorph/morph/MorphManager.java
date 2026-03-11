@@ -46,33 +46,17 @@ public class MorphManager {
         startDisguisePersistTask();
     }
 
-    // =========================================================================
-    //  iDisguise API ACCESS
-    // =========================================================================
     private DisguiseAPI getDisguiseAPI() {
         RegisteredServiceProvider<DisguiseAPI> provider =
                 Bukkit.getServicesManager().getRegistration(DisguiseAPI.class);
         if (provider != null) {
             return provider.getProvider();
         }
-        // Fallback: try to get it from the plugin directly
         plugin.getLogger().warning("[NeoMorph] DisguiseAPI service not found. Is iDisguise installed?");
         return null;
     }
 
-    // =========================================================================
-    //  COLLISION MANAGEMENT
-    //  Uses a scoreboard team with NEVER collision rule. This is a vanilla
-    //  mechanic enforced CLIENT-SIDE — no plugin can override it.
-    //
-    //  CRITICAL: We use player.getScoreboard() NOT getMainScoreboard().
-    //  Many plugins (tab list, sidebar stats, etc.) give players custom
-    //  scoreboards. If we only put our team on the main scoreboard, those
-    //  players never see it. Using player.getScoreboard() targets whatever
-    //  scoreboard the player's client is actually rendering.
-    // =========================================================================
     private void ensureNoCollisionTeam() {
-        // Set up on main scoreboard as a baseline
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
         Team team = scoreboard.getTeam(TEAM_NAME);
         if (team == null) {
@@ -81,11 +65,6 @@ public class MorphManager {
         team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
     }
 
-    /**
-     * Gets or creates the no-collision team on the player's CURRENT scoreboard.
-     * This is the key fix — if a plugin gave this player a custom scoreboard,
-     * we add our team to THAT scoreboard so the client actually sees it.
-     */
     private Team getOrCreateTeamForPlayer(Player player) {
         Scoreboard scoreboard = player.getScoreboard();
         Team team = scoreboard.getTeam(TEAM_NAME);
@@ -105,15 +84,9 @@ public class MorphManager {
         }
     }
 
-    /**
-     * Adds a disguise entity to the no-collision team on the player's scoreboard.
-     * Both the player and the entity must be in the same team for the client to
-     * apply the NEVER collision rule between them.
-     */
     public void addEntityToNoCollisionTeam(Player player, Entity entity) {
         try {
             Team team = getOrCreateTeamForPlayer(player);
-            // Ensure both the player AND the entity are in the team
             if (!team.hasEntry(player.getName())) {
                 team.addEntry(player.getName());
             }
@@ -130,7 +103,6 @@ public class MorphManager {
             if (team != null) {
                 team.removeEntry(player.getName());
             }
-            // Also clean from main scoreboard
             Scoreboard main = Bukkit.getScoreboardManager().getMainScoreboard();
             if (main != scoreboard) {
                 Team mainTeam = main.getTeam(TEAM_NAME);
@@ -141,13 +113,6 @@ public class MorphManager {
         } catch (Exception ignored) {}
     }
 
-    // =========================================================================
-    //  DISGUISE PERSISTENCE — lightweight backup safety net.
-    //  The MAIN persistence is DisguisePersistListener (cancels undisguise events)
-    //  + AbilityTickHandler (refreshes invisibility & self-visibility).
-    //  This task only catches the rare edge case where iDisguise drops the
-    //  disguise without firing an event at all.
-    // =========================================================================
     private void startDisguisePersistTask() {
         new BukkitRunnable() {
             @Override
@@ -161,7 +126,6 @@ public class MorphManager {
                     if (player.isDead()) continue;
                     if (unmorphingPlayers.contains(session.getPlayerUUID())) continue;
 
-                    // Only reapply if iDisguise reports fully not disguised
                     try {
                         if (!api.isDisguised(player)) {
                             EntityType type = session.getMorphType();
@@ -175,12 +139,9 @@ public class MorphManager {
                     } catch (Exception ignored) {}
                 }
             }
-        }.runTaskTimer(plugin, 100L, 100L); // Check every 5 seconds
+        }.runTaskTimer(plugin, 100L, 100L);
     }
 
-    // =========================================================================
-    //  PUBLIC ACCESSORS
-    // =========================================================================
     public AbilityRegistry getRegistry() { return registry; }
 
     public boolean isMorphed(Player player) {
@@ -212,9 +173,6 @@ public class MorphManager {
         return remaining > 0 ? (int) Math.ceil(remaining / 1000.0) : 0;
     }
 
-    // =========================================================================
-    //  MORPH INTO MOB
-    // =========================================================================
     public boolean morph(Player player, EntityType entityType) {
         MobAbility ability = registry.getAbility(entityType);
         if (ability == null) {
@@ -235,12 +193,10 @@ public class MorphManager {
             return false;
         }
 
-        // Unmorph first if already morphed
         if (isMorphed(player)) {
             unmorph(player, false);
         }
 
-        // Save original attribute values
         double origMaxHealth = getAttr(player, Attribute.GENERIC_MAX_HEALTH);
         double origHealth = player.getHealth();
         double origScale = getAttr(player, Attribute.GENERIC_SCALE);
@@ -262,7 +218,6 @@ public class MorphManager {
                 origAllowFlight, origFlying
         );
 
-        // --- STEP 1: Apply disguise via iDisguise ---
         DisguiseAPI api = getDisguiseAPI();
         if (api != null) {
             try {
@@ -275,7 +230,6 @@ public class MorphManager {
                 return false;
             } catch (Exception e) {
                 plugin.getLogger().warning("[NeoMorph] Disguise API error for " + entityType.name() + ": " + e.getMessage());
-                // API failed — try command fallback
                 try {
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
                             "disguise " + player.getName() + " " + entityType.name().toLowerCase());
@@ -287,15 +241,12 @@ public class MorphManager {
             MessageUtil.send(player, "&c&lNEOMORPH &8» &7iDisguise not found! Install iDisguise for visual morphing.");
         }
 
-        // --- STEP 2: Disable collision ---
         addToNoCollisionTeam(player);
         player.setCollidable(false);
 
-        // --- STEP 3: Scale player entity (camera/eye height + hitbox) ---
         double targetScale = ability.getScale();
         setAttr(player, Attribute.GENERIC_SCALE, targetScale);
 
-        // --- STEP 4: Apply mob stats ---
         setAttr(player, Attribute.GENERIC_MAX_HEALTH, ability.getMaxHealth());
         player.setHealth(ability.getMaxHealth());
 
@@ -307,22 +258,18 @@ public class MorphManager {
         setAttr(player, Attribute.GENERIC_FALL_DAMAGE_MULTIPLIER, ability.getFallDamageMultiplier());
         setAttr(player, Attribute.GENERIC_SAFE_FALL_DISTANCE, ability.getSafeFallDistance());
 
-        // --- STEP 5: Flight ---
         if (ability.canFly()) {
             player.setAllowFlight(true);
             player.setFlying(true);
         }
 
-        // --- STEP 6: Passive effects ---
         for (PotionEffect effect : ability.getPassiveEffects()) {
             player.addPotionEffect(effect);
         }
 
-        // Store session & cooldown
         activeMorphs.put(player.getUniqueId(), session);
         cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
 
-        // Effects & messaging
         morphEffect.playMorphEffect(player);
         String msg = plugin.getConfig().getString("messages.morph-success",
                 "&a&lNEOMORPH &8» &7You morphed into &e%mob%&7!");
@@ -335,9 +282,6 @@ public class MorphManager {
         return true;
     }
 
-    // =========================================================================
-    //  MORPH INTO PLAYER
-    // =========================================================================
     public boolean morphIntoPlayer(Player player, String targetName) {
         if (!player.hasPermission("neomorph.player")) {
             MessageUtil.send(player, plugin.getConfig().getString("messages.no-permission",
@@ -380,7 +324,6 @@ public class MorphManager {
                 origAllowFlight, origFlying
         );
 
-        // Apply player disguise via iDisguise
         DisguiseAPI api = getDisguiseAPI();
         if (api != null) {
             try {
@@ -410,19 +353,14 @@ public class MorphManager {
         return true;
     }
 
-    // =========================================================================
-    //  UNMORPH
-    // =========================================================================
     public void unmorph(Player player, boolean sendMessage) {
         UUID uuid = player.getUniqueId();
         MorphSession session = activeMorphs.remove(uuid);
         if (session == null) return;
 
-        // Mark as unmorphing so the persist listener and persist task don't interfere
         unmorphingPlayers.add(uuid);
 
         try {
-            // Remove disguise via iDisguise
             DisguiseAPI api = getDisguiseAPI();
             if (api != null && api.isDisguised(player)) {
                 try {
@@ -430,11 +368,9 @@ public class MorphManager {
                 } catch (Exception ignored) {}
             }
 
-            // Remove from collision team
             removeFromNoCollisionTeam(player);
             player.setCollidable(true);
 
-            // Restore ALL original attributes
             setAttr(player, Attribute.GENERIC_MAX_HEALTH, session.getOriginalMaxHealth());
             setAttr(player, Attribute.GENERIC_SCALE, session.getOriginalScale());
             setAttr(player, Attribute.GENERIC_MOVEMENT_SPEED, session.getOriginalSpeed());
@@ -445,11 +381,8 @@ public class MorphManager {
             setAttr(player, Attribute.GENERIC_FALL_DAMAGE_MULTIPLIER, session.getOriginalFallDamageMultiplier());
             setAttr(player, Attribute.GENERIC_SAFE_FALL_DISTANCE, session.getOriginalSafeFallDistance());
 
-            // ONLY set health if the player is alive — setting health on a dead player
-            // corrupts state and is the root cause of the "can never morph again" bug
             if (!player.isDead()) {
                 double targetHealth = Math.min(session.getOriginalHealth(), session.getOriginalMaxHealth());
-                // Clamp to at least 1.0 to avoid killing the player during unmorph
                 targetHealth = Math.max(targetHealth, 1.0);
                 player.setHealth(targetHealth);
             }
@@ -461,16 +394,13 @@ public class MorphManager {
                 player.setAllowFlight(session.wasAllowFlight());
             }
 
-            // Remove all passive potion effects from the morph
             MobAbility ability = session.getAbility();
             for (PotionEffect effect : ability.getPassiveEffects()) {
                 player.removePotionEffect(effect.getType());
             }
 
-            // Remove the invisibility we keep applying for self-visibility
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
 
-            // Make sure invulnerability is cleaned up (in case an ability left it on)
             player.setInvulnerable(false);
 
             morphEffect.playUnmorphEffect(player);
@@ -480,7 +410,6 @@ public class MorphManager {
                         "&a&lNEOMORPH &8» &7You returned to your normal form."));
             }
         } finally {
-            // Always clear the unmorphing flag
             unmorphingPlayers.remove(uuid);
         }
     }
@@ -495,22 +424,12 @@ public class MorphManager {
         activeMorphs.clear();
     }
 
-    /**
-     * Called by the undisguise event listener — prevents iDisguise from
-     * removing disguises that NeoMorph is managing.
-     * IMPORTANT: Allow undisguise when player is dead or when we're
-     * in the middle of an unmorph operation, otherwise the disguise
-     * gets permanently stuck and the player can never morph again.
-     */
     public boolean shouldPreventUndisguise(Player player) {
         if (player.isDead()) return false;
         if (unmorphingPlayers.contains(player.getUniqueId())) return false;
         return activeMorphs.containsKey(player.getUniqueId());
     }
 
-    // =========================================================================
-    //  ATTRIBUTE HELPERS
-    // =========================================================================
     private double getAttr(Player player, Attribute attribute) {
         AttributeInstance inst = player.getAttribute(attribute);
         return inst != null ? inst.getBaseValue() : 0.0;

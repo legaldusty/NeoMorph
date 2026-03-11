@@ -100,7 +100,6 @@ public class MobAbility {
         this.abilityCooldownTicks = builder.abilityCooldownTicks;
     }
 
-    // Getters
     public EntityType getEntityType() { return entityType; }
     public String getDisplayName() { return displayName; }
     public Material getIcon() { return icon; }
@@ -164,7 +163,6 @@ public class MobAbility {
         private Builder(EntityType type) {
             this.entityType = type;
             this.displayName = com.neomorph.util.MessageUtil.formatEntityName(type.name());
-            // Default icon: try to find spawn egg
             String eggName = type.name() + "_SPAWN_EGG";
             try {
                 this.icon = Material.valueOf(eggName);
